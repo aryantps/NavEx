@@ -1,0 +1,1 @@
+# Trip model placeholder
