@@ -16,7 +16,7 @@ class VehicleTracking(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     
-    vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=False)
+    vehicle_id = Column(String(50), ForeignKey("vehicles.id"), nullable=False)
 
     tracking_type = Column(Enum(TrackingTypeEnum), nullable=False)
     provider_name = Column(String(100), nullable=True)

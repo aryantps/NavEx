@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.core.config import settings
 
 engine = create_async_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
+    settings.DATABASE_URL,
     pool_size=5, # persistent connections open to db
     max_overflow=10, # Extra temp conn open beyond pool_size when pool is full - not persistent
     pool_timeout=10, # wait in seconds to get a conn from pool before raising an error

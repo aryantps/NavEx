@@ -2,6 +2,10 @@ from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeMeta
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from fastapi import HTTPException, status
+
 from typing import TypeVar, Generic, List, Dict, Optional
 
 
@@ -25,11 +29,24 @@ class BaseRepository(Generic[ModelType]):
         :param data: The data to insert, as a dictionary.
         :return: The created model object.
         """
-        obj = self.model(**data)
-        self.db.add(obj)
-        await self.db.commit()
-        await self.db.refresh(obj)
-        return obj
+        try:
+            obj = self.model(**data)
+            self.db.add(obj)
+            await self.db.commit()
+            await self.db.refresh(obj)
+            return obj
+        except IntegrityError as e:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Integrity constraint violated. Possibly a duplicate or foreign key error."
+            ) from e
+        except SQLAlchemyError as e:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error occurred."
+            ) from e
 
     async def get(self, id: int) -> Optional[ModelType]:
         """

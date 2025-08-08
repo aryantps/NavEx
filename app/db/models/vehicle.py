@@ -1,3 +1,4 @@
+from app.utils.utils import create_vehicle_id
 from sqlalchemy import (
     Column, Integer, String, Boolean, Numeric, TIMESTAMP,
     ForeignKey, UniqueConstraint, CheckConstraint, Index,
@@ -12,6 +13,7 @@ class Vehicle(Base):
     __tablename__ = "vehicles"
 
     id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(50), primary_key=True, default=create_vehicle_id)
     vehicle_number = Column(String(50), nullable=False)
     vehicle_type_id = Column(Integer, ForeignKey("vehicle_types.id", ondelete="CASCADE"), nullable=False)
     is_assigned = Column(Boolean, default=False, nullable=False)

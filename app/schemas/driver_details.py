@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, constr, conbool
+from pydantic import BaseModel, Field, constr
 from typing import Optional
 from datetime import datetime
 
@@ -26,5 +26,6 @@ class DriverDetailRead(DriverDetailBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
