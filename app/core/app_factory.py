@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
 
 def register_routes(app: FastAPI):
     app.include_router(trip_router, prefix="/api/v1/trips", tags=["Trips"])
-    app.include_router(tracking_router, prefix="/api/v1/tracking", tags=["Tracking"])
+    app.include_router(tracking_router, prefix="/api/v1/tracking-records", tags=["Vehicle Tracking"])
     app.include_router(vehicle_type_router, prefix="/api/v1/vehicle-types", tags=["Vehicle Types"])
     app.include_router(vehicle_router, prefix="/api/v1/vehicle", tags=["Vehicles"])
     app.include_router(location_router, prefix="/api/v1/location", tags=["Locations"])

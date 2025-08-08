@@ -5,7 +5,7 @@ from app.schemas.driver_details import DriverDetailCreate, DriverDetailRead
 from app.db.session import get_db as get_session
 from app.schemas.response import APIResponse
 
-router = APIRouter(prefix="/drivers", tags=["Drivers"])
+router = APIRouter()
 
 def get_driver_repo(session=Depends(get_session)) -> DriverDetailRepository:
     return DriverDetailRepository(session)

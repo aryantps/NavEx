@@ -7,7 +7,7 @@ from app.schemas.trip import TripCreate, TripRead
 from app.schemas.response import APIResponse
 from app.db.session import get_db as get_session
 
-router = APIRouter(prefix="/trips", tags=["Trips"])
+router = APIRouter()
 
 
 def get_trip_repo(session=Depends(get_session)) -> TripRepository:

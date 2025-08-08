@@ -11,7 +11,7 @@ from app.schemas.vehicle_tracking import (
 from app.schemas.response import APIResponse
 from app.db.session import get_db as get_session  # Returns an `AsyncSession`
 
-router = APIRouter(prefix="/tracking-records", tags=["Vehicle Tracking"])
+router = APIRouter()
 
 
 def get_tracking_repo(session=Depends(get_session)) -> VehicleTrackingRepository:

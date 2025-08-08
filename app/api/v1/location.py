@@ -6,7 +6,7 @@ from app.schemas.location import LocationCreate, LocationRead
 from app.schemas.response import APIResponse
 from app.db.session import get_db as get_session
 
-router = APIRouter(prefix="/locations", tags=["Locations"])
+router = APIRouter()
 
 
 def get_location_repo(session=Depends(get_session)) -> LocationRepository:

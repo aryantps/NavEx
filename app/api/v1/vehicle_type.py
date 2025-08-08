@@ -6,7 +6,7 @@ from app.schemas.vehicle_type import VehicleTypeCreate, VehicleTypeRead
 from app.schemas.response import APIResponse
 from app.db.session import get_db as get_session
 
-router = APIRouter(prefix="/vehicle-types", tags=["Vehicle Types"])
+router = APIRouter()
 
 
 def get_vehicle_type_repo(session=Depends(get_session)) -> VehicleTypeRepository:
