@@ -1,35 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
-from sqlalchemy.exc import IntegrityError
 
 from app.db.repositories.vehicle import VehicleRepository
-from app.schemas.vehicle import (
-    VehicleCreate,
-    VehicleRead,
-)
+from app.schemas.vehicle import VehicleCreate, VehicleRead
+from app.schemas.response import APIResponse
 from app.db.session import get_db as get_session
 
 router = APIRouter(prefix="/vehicles", tags=["Vehicles"])
 
 
-# Dependency injection
 def get_vehicle_repo(session=Depends(get_session)) -> VehicleRepository:
     return VehicleRepository(session)
 
 
-@router.post("/", response_model=VehicleRead)
+@router.post("/", response_model=APIResponse[VehicleRead], status_code=status.HTTP_201_CREATED)
 async def create_vehicle(
     data: VehicleCreate,
     repo: VehicleRepository = Depends(get_vehicle_repo)
 ):
-    try:
-        return await repo.create(data.dict())
-    except IntegrityError:
-        await repo.db.rollback()
-        raise HTTPException(status_code=400, detail="Vehicle with the same code or number already exists.")
+    vehicle = await repo.create(data.dict())
+    return APIResponse(success=True, code=201, data=vehicle)
 
 
-@router.get("/", response_model=List[VehicleRead])
+@router.get("/", response_model=APIResponse[List[VehicleRead]])
 async def list_vehicles(
     tenant: Optional[str] = None,
     is_assigned: Optional[bool] = None,
@@ -44,10 +37,11 @@ async def list_vehicles(
     if vehicle_type_id is not None:
         filters["vehicle_type_id"] = vehicle_type_id
 
-    return await repo.get_all(filters=filters)
+    vehicles = await repo.get_all(filters=filters)
+    return APIResponse(success=True, code=200, data=vehicles)
 
 
-@router.get("/{id}", response_model=VehicleRead)
+@router.get("/{id}", response_model=APIResponse[VehicleRead])
 async def get_vehicle_by_id(
     id: int,
     repo: VehicleRepository = Depends(get_vehicle_repo)
@@ -55,10 +49,10 @@ async def get_vehicle_by_id(
     vehicle = await repo.get(id)
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
-    return vehicle
+    return APIResponse(success=True, code=200, data=vehicle)
 
 
-@router.put("/{id}", response_model=VehicleRead)
+@router.put("/{id}", response_model=APIResponse[VehicleRead])
 async def update_vehicle(
     id: int,
     data: VehicleCreate,
@@ -67,10 +61,10 @@ async def update_vehicle(
     updated = await repo.update(id, data.dict())
     if not updated:
         raise HTTPException(status_code=404, detail="Vehicle not found")
-    return updated
+    return APIResponse(success=True, code=200, data=updated)
 
 
-@router.patch("/{id}/deactivate", response_model=VehicleRead)
+@router.patch("/{id}/deactivate", response_model=APIResponse[VehicleRead])
 async def deactivate_vehicle(
     id: int,
     repo: VehicleRepository = Depends(get_vehicle_repo)
@@ -80,10 +74,10 @@ async def deactivate_vehicle(
         raise HTTPException(status_code=404, detail="Vehicle not found")
 
     updated = await repo.update(id, {"is_assigned": False})
-    return updated
+    return APIResponse(success=True, code=200, data=updated)
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=APIResponse[None])
 async def delete_vehicle(
     id: int,
     repo: VehicleRepository = Depends(get_vehicle_repo)
@@ -91,4 +85,4 @@ async def delete_vehicle(
     success = await repo.delete(id)
     if not success:
         raise HTTPException(status_code=404, detail="Vehicle not found")
-    return {"detail": "Deleted"}
+    return APIResponse(success=True, code=200, message="Deleted")

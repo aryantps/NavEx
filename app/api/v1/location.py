@@ -1,35 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
-from sqlalchemy.exc import IntegrityError
 
 from app.db.repositories.location import LocationRepository
-from app.schemas.location import (
-    LocationCreate,
-    LocationRead,
-)
+from app.schemas.location import LocationCreate, LocationRead
+from app.schemas.response import APIResponse
 from app.db.session import get_db as get_session
 
 router = APIRouter(prefix="/locations", tags=["Locations"])
 
 
-# Dependency injection for the repository
 def get_location_repo(session=Depends(get_session)) -> LocationRepository:
     return LocationRepository(session)
 
 
-@router.post("/", response_model=LocationRead)
+@router.post("/", response_model=APIResponse[LocationRead], status_code=status.HTTP_201_CREATED)
 async def create_location(
     data: LocationCreate,
     repo: LocationRepository = Depends(get_location_repo)
 ):
-    try:
-        return await repo.create(data.dict())
-    except IntegrityError:
-        await repo.db.rollback()
-        raise HTTPException(status_code=400, detail="Location with this code or name already exists.")
+    location = await repo.create(data.dict())
+    return APIResponse(success=True, code=201, data=location)
 
 
-@router.get("/", response_model=List[LocationRead])
+@router.get("/", response_model=APIResponse[List[LocationRead]])
 async def list_locations(
     tenant: Optional[str] = None,
     location_code: Optional[str] = None,
@@ -44,10 +37,11 @@ async def list_locations(
     if location_name is not None:
         filters["location_name"] = location_name
 
-    return await repo.get_all(filters=filters)
+    locations = await repo.get_all(filters=filters)
+    return APIResponse(success=True, code=200, data=locations)
 
 
-@router.get("/{id}", response_model=LocationRead)
+@router.get("/{id}", response_model=APIResponse[LocationRead])
 async def get_location_by_id(
     id: int,
     repo: LocationRepository = Depends(get_location_repo)
@@ -55,10 +49,10 @@ async def get_location_by_id(
     location = await repo.get(id)
     if not location:
         raise HTTPException(status_code=404, detail="Location not found")
-    return location
+    return APIResponse(success=True, code=200, data=location)
 
 
-@router.put("/{id}", response_model=LocationRead)
+@router.put("/{id}", response_model=APIResponse[LocationRead])
 async def update_location(
     id: int,
     data: LocationCreate,
@@ -67,10 +61,10 @@ async def update_location(
     updated = await repo.update(id, data.dict())
     if not updated:
         raise HTTPException(status_code=404, detail="Location not found")
-    return updated
+    return APIResponse(success=True, code=200, data=updated)
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=APIResponse[None])
 async def delete_location(
     id: int,
     repo: LocationRepository = Depends(get_location_repo)
@@ -78,4 +72,4 @@ async def delete_location(
     success = await repo.delete(id)
     if not success:
         raise HTTPException(status_code=404, detail="Location not found")
-    return {"detail": "Deleted"}
+    return APIResponse(success=True, code=200, message="Deleted")
