@@ -3,9 +3,9 @@ import datetime
 import os
 
 
-PRIVATE_KEY_PATH = "./private_key.pem" # PRIVATE_KEY_PATH = os.environ.get("PRIVATE_KEY_PATH", "./private_key.pem")
-AUDIENCE = os.environ.get("AUTH_AUDIENCE", "default-client-id")
-ISSUER = os.environ.get("AUTH_ISSUER", "https://issuer.navex.com")
+PRIVATE_KEY_PATH = "private.key" # PRIVATE_KEY_PATH = os.environ.get("PRIVATE_KEY_PATH", "./private_key.pem")
+AUDIENCE = os.environ.get("AUTH_AUDIENCE", "api-navex-client")
+ISSUER = os.environ.get("AUTH_ISSUER", "api.navex.com")
 
 with open(PRIVATE_KEY_PATH, "r") as f:
     private_key = f.read()
@@ -15,8 +15,8 @@ payload = {
     "roles": "admin,editor",
     "iss": ISSUER,
     "aud": AUDIENCE,
-    "iat": datetime.datetime.utcnow(),
-    "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=500)
+    "iat": datetime.datetime.now(datetime.UTC),
+    "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=500)
 }
 
 token = jwt.encode(

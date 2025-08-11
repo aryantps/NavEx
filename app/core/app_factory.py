@@ -1,4 +1,5 @@
 from app.middleware.request_id import RequestIDMiddleware
+from app.middleware.auth_user_context import JWTAuthMiddlewareRS256
 from fastapi import FastAPI, HTTPException
 from app.api.v1.tracking import router as tracking_router
 from app.api.v1.vehicle_type import router as vehicle_type_router
@@ -12,6 +13,7 @@ from app.api.v1.role import router as role_router
 from app.api.v1.user_role import router as user_role_router
 from app.core.startup_events import register_startup_events
 
+from fastapi.openapi.utils import get_openapi
 
 from sqlalchemy.exc import (
     IntegrityError,
@@ -34,9 +36,12 @@ from app.core.exception_handlers import (
 def create_app() -> FastAPI:
     app = FastAPI(title="NavEx")
     app.add_middleware(RequestIDMiddleware)
+    app.add_middleware(JWTAuthMiddlewareRS256)
     register_routes(app)
     register_startup_events(app)
     register_exception_handlers(app)
+
+    app.openapi = custom_openapi_factory(app)
 
     @app.get("/health", tags=["Health"])
     def health_check():
@@ -68,3 +73,33 @@ def register_exception_handlers(app: FastAPI):
     app.add_exception_handler(ProgrammingError, programming_error_handler)
     app.add_exception_handler(DataError, data_error_handler)
     app.add_exception_handler(Exception, generic_exception_handler)
+
+
+def custom_openapi_factory(app: FastAPI):
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+
+        openapi_schema = get_openapi(
+            title="NavEx API",
+            version="1.0.0",
+            description="API for the NavEx multi-tenant fleet system",
+            routes=app.routes,
+        )
+
+        openapi_schema["components"]["securitySchemes"] = {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+
+        for path in openapi_schema["paths"].values():
+            for operation in path.values():
+                operation["security"] = [{"BearerAuth": []}]
+
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    return custom_openapi

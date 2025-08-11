@@ -11,7 +11,7 @@ class Tenant(Base):
     contact_email = Column(String, nullable=False)
     status = Column(String, default="active")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
     users = relationship("User", back_populates="tenant")
     roles = relationship("Role", back_populates="tenant")

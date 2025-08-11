@@ -8,6 +8,7 @@ from app.schemas.pagination import PaginatedQueryResponse
 from app.db.repositories.user import UserRepository
 from app.db.session import get_db as get_session
 from app.db.models.user import User
+from app.core.security import hash_password 
 
 router = APIRouter()
 
@@ -21,7 +22,10 @@ async def create_user(
     data: UserCreate,
     repo: UserRepository = Depends(get_user_repo)
 ):
-    user = await repo.create(data.dict())
+    user_data = data.model_dump()
+    user_data["hashed_password"] = hash_password(user_data.pop("password"))
+    
+    user = await repo.create(user_data)
     return APIResponse(success=True, code=201, data=user)
 
 

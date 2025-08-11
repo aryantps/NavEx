@@ -8,6 +8,7 @@ from fastapi import HTTPException, status
 
 from typing import TypeVar, Generic, List, Dict, Optional
 
+from app.core.logger import logger
 
 ModelType = TypeVar("ModelType", bound=DeclarativeMeta) # Type variable for generic model types
 
@@ -42,6 +43,7 @@ class BaseRepository(Generic[ModelType]):
                 detail="Integrity constraint violated. Possibly a duplicate or foreign key error."
             ) from e
         except SQLAlchemyError as e:
+            logger.error(f"Database error: {e}", exc_info=True)
             await self.db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
