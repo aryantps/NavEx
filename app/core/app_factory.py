@@ -11,7 +11,7 @@ from app.api.v1.tenant import router as tenant_router
 from app.api.v1.user import router as user_router
 from app.api.v1.role import router as role_router
 from app.api.v1.user_role import router as user_role_router
-from app.core.startup_events import register_startup_events
+from app.core.startup_events import lifespan
 
 from fastapi.openapi.utils import get_openapi
 
@@ -34,11 +34,13 @@ from app.core.exception_handlers import (
 )
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="NavEx")
+    app = FastAPI(
+        title="NavEx",
+        lifespan=lifespan
+    )
     app.add_middleware(RequestIDMiddleware)
     app.add_middleware(JWTAuthMiddlewareRS256)
     register_routes(app)
-    register_startup_events(app)
     register_exception_handlers(app)
 
     app.openapi = custom_openapi_factory(app)
