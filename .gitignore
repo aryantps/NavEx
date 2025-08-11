@@ -208,3 +208,5 @@ __marimo__/
 
 archive/
 commit.sh
+public.key
+private.key

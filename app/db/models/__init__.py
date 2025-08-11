@@ -4,4 +4,8 @@ from .vehicle_tracking import VehicleTracking
 from .location import Location
 from .trip import Trip
 from .driver_details import DriverDetail
-
+from .user import User
+from .tenant import Tenant
+from .role import Role
+from .invitation import Invitation
+from .user_role import UserRole

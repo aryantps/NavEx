@@ -6,6 +6,10 @@ from app.api.v1.vehicle import router as vehicle_router
 from app.api.v1.location import router as location_router
 from app.api.v1.driver_details import router as driver_details_router
 from app.api.v1.trip import router as trip_router
+from app.api.v1.tenant import router as tenant_router
+from app.api.v1.user import router as user_router
+from app.api.v1.role import router as role_router
+from app.api.v1.user_role import router as user_role_router
 from app.core.startup_events import register_startup_events
 
 
@@ -28,7 +32,7 @@ from app.core.exception_handlers import (
 )
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Logistics Management API")
+    app = FastAPI(title="NavEx")
     app.add_middleware(RequestIDMiddleware)
     register_routes(app)
     register_startup_events(app)
@@ -42,6 +46,10 @@ def create_app() -> FastAPI:
 
 
 def register_routes(app: FastAPI):
+    app.include_router(tenant_router, prefix="/api/v1/tenants", tags=["Tenants"])
+    app.include_router(user_router, prefix="/api/v1/users", tags=["Users"])
+    app.include_router(role_router, prefix="/api/v1/roles", tags=["Roles"])
+    app.include_router(user_role_router, prefix="/api/v1/user-roles", tags=["User Roles"])
     app.include_router(trip_router, prefix="/api/v1/trips", tags=["Trips"])
     app.include_router(tracking_router, prefix="/api/v1/tracking-records", tags=["Vehicle Tracking"])
     app.include_router(vehicle_type_router, prefix="/api/v1/vehicle-types", tags=["Vehicle Types"])
