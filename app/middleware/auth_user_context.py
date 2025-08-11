@@ -7,8 +7,9 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from uvicorn.main import logger
 
-from app.core.config import settings
+from app.core.config import get_settings
 
+settings = get_settings()
 
 EXEMPT_PATHS = {"/docs", "/openapi.json"}
 EXEMPT_PREFIXES = ["/open"]

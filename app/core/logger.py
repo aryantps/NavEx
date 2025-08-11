@@ -3,7 +3,9 @@ import sys
 import logging
 from logging.config import dictConfig
 from app.core.context import get_request_id
-from app.core.config import settings
+from app.core.config import get_settings
+
+settings = get_settings()
 
 class RequestIDFilter(logging.Filter):
     def filter(self, record):
